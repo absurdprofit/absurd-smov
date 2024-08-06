@@ -68,7 +68,8 @@ export default defineConfig(({ mode }) => {
         filename: 'background-fetch.service.ts',
         strategies: 'injectManifest',
         devOptions: {
-          enabled: true
+          enabled: true,
+          type: "module"
         },
         injectManifest: {
           injectionPoint: undefined

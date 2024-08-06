@@ -2,15 +2,10 @@
 /// <reference lib="webworker" />
 /// <reference types="@types/serviceworker" />
 /// <reference types="./background-fetch.d.ts" />
-import { clientsClaim } from 'workbox-core';
+import { clientsClaim } from "workbox-core";
 
 globalThis.skipWaiting();
 clientsClaim();
-
-console.log("Running Background Fetcher");
-globalThis.addEventListener("install", () => {
-  console.log("Installed Background Fetcher");
-});
 
 async function cacheOrFetch(event: FetchEvent) {
   // Offline first:
