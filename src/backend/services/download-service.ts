@@ -34,16 +34,10 @@ export class DownloadService extends EventTarget {
 
     if (!isSameOrigin(url)) {
       const proxyURL = new URL(PROXY_PATH, window.location.origin);
-      proxyURL.searchParams.set(
-        PROXY_DESTINATION_QUERY_KEY,
-        encodeURIComponent(url),
-      );
+      proxyURL.searchParams.set(PROXY_DESTINATION_QUERY_KEY, encodeURI(url));
       url = proxyURL.toString();
       if (resource instanceof Request) {
-        resource = await this.#cloneRequestWithNewURL(
-          proxyURL.toString(),
-          resource,
-        );
+        resource = await this.#cloneRequestWithNewURL(url, resource);
       } else {
         resource = url;
       }
