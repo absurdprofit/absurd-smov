@@ -73,6 +73,7 @@
     "slugify": "^1.6.6",
     "subsrt-ts": "^2.1.2",
     "workbox-core": "^7.1.0",
+    "workbox-range-requests": "^7.1.0",
     "workbox-window": "^7.1.0",
     "zustand": "^4.5.4"
   },

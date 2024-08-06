@@ -156,6 +156,9 @@ importers:
       workbox-core:
         specifier: ^7.1.0
         version: 7.1.0
+      workbox-range-requests:
+        specifier: ^7.1.0
+        version: 7.1.0
       workbox-window:
         specifier: ^7.1.0
         version: 7.1.0

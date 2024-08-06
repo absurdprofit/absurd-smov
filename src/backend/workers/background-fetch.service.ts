@@ -2,6 +2,7 @@
 /// <reference types="@types/serviceworker" />
 /// <reference types="./background-fetch.d.ts" />
 import { clientsClaim } from "workbox-core";
+import { createPartialResponse } from "workbox-range-requests";
 
 import { PROXY_DESTINATION_QUERY_KEY } from "../common/constants";
 
@@ -13,7 +14,12 @@ async function cacheOrFetch(event: FetchEvent) {
   const url = event.request.url.split("?")[0]; // remove the query part
   const cachedResponse = await caches.match(url);
 
-  return cachedResponse || fetch(event.request);
+  if (!cachedResponse) return fetch(event.request);
+
+  if (event.request.headers.has("Range")) {
+    return createPartialResponse(event.request, cachedResponse);
+  }
+  return cachedResponse;
 }
 
 globalThis.addEventListener("fetch", (event) => {

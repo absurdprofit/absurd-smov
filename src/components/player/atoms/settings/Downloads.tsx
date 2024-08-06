@@ -43,7 +43,6 @@ function StyleTrans(props: { k: string }) {
 
 export function DownloadView({ id }: { id: string }) {
   const downloadService = DownloadService.instance;
-  console.log(downloadService);
   const router = useOverlayRouter(id);
   const { t } = useTranslation();
   const downloadUrl = useDownloadLink();
