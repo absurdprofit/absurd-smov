@@ -25,6 +25,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
   return {
     base: env.VITE_BASE_URL || '/',
+    server: {
+      proxy: {
+        '/proxy': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
+    },
     plugins: [
       million.vite({ auto: true, mute: true }),
       handlebars({
@@ -55,6 +64,18 @@ export default defineConfig(({ mode }) => {
         },
       }),
       VitePWA({
+        srcDir: 'src/backend/workers',
+        filename: 'background-fetch.service.ts',
+        strategies: 'injectManifest',
+        devOptions: {
+          enabled: true
+        },
+        injectManifest: {
+          injectionPoint: undefined
+        }
+      }),
+      VitePWA({
+        scope: 'assets',
         disable: env.VITE_PWA_ENABLED !== "true",
         registerType: "autoUpdate",
         workbox: {

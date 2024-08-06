@@ -35,9 +35,11 @@ import {
   isExtensionActiveCached,
 } from "./backend/extension/messaging";
 import { initializeChromecast } from "./setup/chromecast";
+import { initialiseBackgroundFetchWorker } from "./setup/workers";
 import { initializeOldStores } from "./stores/__old/migrations";
 
 // initialize
+initialiseBackgroundFetchWorker();
 initializeChromecast();
 
 function LoadingScreen(props: { type: "user" | "lazy" }) {

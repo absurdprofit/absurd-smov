@@ -153,6 +153,9 @@ importers:
       subsrt-ts:
         specifier: ^2.1.2
         version: 2.1.2
+      workbox-window:
+        specifier: ^7.1.0
+        version: 7.1.0
       zustand:
         specifier: ^4.5.4
         version: 4.5.4(@types/react@18.3.3)(immer@10.1.1)(react@18.3.1)
@@ -223,6 +226,9 @@ importers:
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
+      '@types/serviceworker':
+        specifier: ^0.0.91
+        version: 0.0.91
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.21.0
         version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
@@ -325,7 +331,7 @@ importers:
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.14.13)(jsdom@23.2.0)(terser@5.31.3)
-      workbox-window:
+      workbox-core:
         specifier: ^7.1.0
         version: 7.1.0
 
@@ -1459,6 +1465,9 @@ packages:
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
+
+  '@types/serviceworker@0.0.91':
+    resolution: {integrity: sha512-Pl5Oi1WgXeEseX4LLib/botpbvscm506GH3SPKM00mnSgQRijsQZmiYnOM8tvA7diXPIvhyk5j5+D9O2mD2qHg==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -5552,6 +5561,8 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/semver@7.5.8': {}
+
+  '@types/serviceworker@0.0.91': {}
 
   '@types/trusted-types@2.0.7': {}
 
