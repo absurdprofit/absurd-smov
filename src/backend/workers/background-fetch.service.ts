@@ -1,8 +1,9 @@
 /// <reference lib="ES2015" />
-/// <reference lib="webworker" />
 /// <reference types="@types/serviceworker" />
 /// <reference types="./background-fetch.d.ts" />
 import { clientsClaim } from "workbox-core";
+
+import { PROXY_DESTINATION_QUERY_KEY } from "../common/constants";
 
 globalThis.skipWaiting();
 clientsClaim();
@@ -15,7 +16,7 @@ async function cacheOrFetch(event: FetchEvent) {
 }
 
 globalThis.addEventListener("fetch", (event) => {
-  if (!event.request.headers.get("Content-Type")?.includes("video/")) return;
+  if (event.request.destination !== "video") return;
 
   event.respondWith(cacheOrFetch(event));
 });
@@ -28,7 +29,14 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
     const records = await bgFetch.matchAll();
 
     const promises = records.map(async (record) => {
-      await cache.put(record.request, await record.responseReady);
+      const proxiedURL = new URL(record.request.url);
+      let request;
+      if (proxiedURL.searchParams.has(PROXY_DESTINATION_QUERY_KEY))
+        request = decodeURIComponent(
+          proxiedURL.searchParams.get(PROXY_DESTINATION_QUERY_KEY)!,
+        );
+      else request = record.request;
+      await cache.put(request, await record.responseReady);
     });
 
     await Promise.all(promises);

@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useCopyToClipboard } from "react-use";
 
+import { DownloadService } from "@/backend/services/download-service";
 import { Button } from "@/components/buttons/Button";
 import { Icon, Icons } from "@/components/Icon";
 import { OverlayPage } from "@/components/overlays/OverlayPage";
@@ -41,6 +42,7 @@ function StyleTrans(props: { k: string }) {
 }
 
 export function DownloadView({ id }: { id: string }) {
+  const downloadService = DownloadService.instance;
   const router = useOverlayRouter(id);
   const { t } = useTranslation();
   const downloadUrl = useDownloadLink();
@@ -115,7 +117,16 @@ export function DownloadView({ id }: { id: string }) {
                 <StyleTrans k="player.menus.downloads.disclaimer" />
               </Menu.Paragraph>
 
-              <Button className="w-full" href={downloadUrl} theme="purple">
+              <Button
+                className="w-full"
+                onClick={() =>
+                  downloadService.download(downloadUrl, {
+                    title: "My movie",
+                    icons: [],
+                  })
+                }
+                theme="purple"
+              >
                 {t("player.menus.downloads.downloadVideo")}
               </Button>
               <Button

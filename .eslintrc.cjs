@@ -45,6 +45,8 @@ module.exports = {
     "react/require-default-props": "off",
     "react/destructuring-assignment": "off",
     "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "class-methods-use-this": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "no-console": ["warn", { allow: ["warn", "error", "debug", "info"] }],
     "@typescript-eslint/no-this-alias": "off",

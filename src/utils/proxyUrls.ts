@@ -75,3 +75,7 @@ export function getProviderApiUrls() {
     .filter((v) => v.type === "api")
     .map((v) => v.url);
 }
+
+export function isSameOrigin(url: string) {
+  return new URL(url).origin === window.location.origin;
+}
