@@ -15,6 +15,8 @@ import { WatchingPart } from "@/pages/parts/home/WatchingPart";
 import { SearchListPart } from "@/pages/parts/search/SearchListPart";
 import { SearchLoadingPart } from "@/pages/parts/search/SearchLoadingPart";
 
+import { DownloadsPart } from "./parts/home/DownloadsPart";
+
 function useSearch(search: string) {
   const [searching, setSearching] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,6 +47,7 @@ export function HomePage() {
   const searchParams = useSearchQuery();
   const [search] = searchParams;
   const s = useSearch(search);
+  const [showDownloads, setShowDownloads] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showWatching, setShowWatching] = useState(false);
 
@@ -74,10 +77,11 @@ export function HomePage() {
         ) : (
           <>
             <div className="flex flex-col gap-8">
+              <DownloadsPart onItemsChange={setShowDownloads} />
               <BookmarksPart onItemsChange={setShowBookmarks} />
               <WatchingPart onItemsChange={setShowWatching} />
             </div>
-            {!(showBookmarks || showWatching) ? (
+            {!(showBookmarks || showWatching || showDownloads) ? (
               <div className="flex flex-col items-center justify-center">
                 <p className="text-[18.5px] pb-3">{emptyText}</p>
                 <Button

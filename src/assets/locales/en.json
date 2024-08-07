@@ -122,6 +122,9 @@
     "continueWatching": {
       "sectionTitle": "Continue Watching..."
     },
+    "downloads": {
+      "sectionTitle": "Downloads"
+    },
     "mediaList": {
       "stopEditing": "Stop editing"
     },

@@ -7,5 +7,7 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  }
+  },
+  "editor.tabSize": 2,
+  "files.eol": "\n"
 }

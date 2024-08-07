@@ -2,13 +2,13 @@ import { useCallback, useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useCopyToClipboard } from "react-use";
 
-import { DownloadService } from "@/backend/services/download-service";
 import { Button } from "@/components/buttons/Button";
 import { Icon, Icons } from "@/components/Icon";
 import { OverlayPage } from "@/components/overlays/OverlayPage";
 import { Menu } from "@/components/player/internals/ContextMenu";
 import { convertSubtitlesToSrtDataurl } from "@/components/player/utils/captions";
 import { useOverlayRouter } from "@/hooks/useOverlayRouter";
+import { useDownloadStore } from "@/stores/downloads";
 import { usePlayerStore } from "@/stores/player/store";
 
 export function useDownloadLink() {
@@ -42,9 +42,9 @@ function StyleTrans(props: { k: string }) {
 }
 
 export function DownloadView({ id }: { id: string }) {
-  const downloadService = DownloadService.instance;
   const router = useOverlayRouter(id);
   const { t } = useTranslation();
+  const downloadStore = useDownloadStore();
   const downloadUrl = useDownloadLink();
   const metadata = usePlayerStore((s) => s.meta);
   const [, copyToClipboard] = useCopyToClipboard();
@@ -62,21 +62,9 @@ export function DownloadView({ id }: { id: string }) {
   if (!downloadUrl || !metadata) return null;
 
   const onDownload = async () => {
-    const icon = {
-      src: metadata.poster ?? "/android-chrome-512x512.png",
-    };
-
-    let title = metadata.title;
-    if (metadata.type === "show") {
-      const humanizedEpisodeId = t("media.episodeDisplay", {
-        season: metadata.season?.number,
-        episode: metadata.episode?.number,
-      });
-      title += ` - ${humanizedEpisodeId}`;
-    }
-    downloadService.download(downloadUrl, {
-      title,
-      icons: [icon],
+    downloadStore.addDownload({
+      ...metadata,
+      downloadUrl,
     });
   };
 
