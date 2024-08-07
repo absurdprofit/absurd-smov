@@ -156,7 +156,16 @@ importers:
       workbox-core:
         specifier: ^7.1.0
         version: 7.1.0
+      workbox-expiration:
+        specifier: ^7.1.0
+        version: 7.1.0
       workbox-range-requests:
+        specifier: ^7.1.0
+        version: 7.1.0
+      workbox-routing:
+        specifier: ^7.1.0
+        version: 7.1.0
+      workbox-strategies:
         specifier: ^7.1.0
         version: 7.1.0
       workbox-window:

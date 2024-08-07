@@ -77,5 +77,5 @@ export function getProviderApiUrls() {
 }
 
 export function isSameOrigin(url: string) {
-  return new URL(url).origin === window.location.origin;
+  return new URL(url).origin === globalThis.location.origin;
 }

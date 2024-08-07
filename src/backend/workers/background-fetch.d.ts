@@ -6,8 +6,9 @@ interface BackgroundFetchRecord {
 
 interface BackgroundFetchIcon {
   src: string;
-  sizes: string;
-  type: string;
+  sizes?: string;
+  type?: string;
+  label?: string;
 }
 
 interface BackgroundFetchOptions {

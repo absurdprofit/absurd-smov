@@ -46,6 +46,7 @@ export function DownloadView({ id }: { id: string }) {
   const router = useOverlayRouter(id);
   const { t } = useTranslation();
   const downloadUrl = useDownloadLink();
+  const metadata = usePlayerStore((s) => s.meta);
   const [, copyToClipboard] = useCopyToClipboard();
 
   const sourceType = usePlayerStore((s) => s.source?.type);
@@ -58,7 +59,26 @@ export function DownloadView({ id }: { id: string }) {
     window.open(dataUrl);
   }, [selectedCaption]);
 
-  if (!downloadUrl) return null;
+  if (!downloadUrl || !metadata) return null;
+
+  const onDownload = async () => {
+    const icon = {
+      src: metadata.poster ?? "/android-chrome-512x512.png",
+    };
+
+    let title = metadata.title;
+    if (metadata.type === "show") {
+      const humanizedEpisodeId = t("media.episodeDisplay", {
+        season: metadata.season?.number,
+        episode: metadata.episode?.number,
+      });
+      title += ` - ${humanizedEpisodeId}`;
+    }
+    downloadService.download(downloadUrl, {
+      title,
+      icons: [icon],
+    });
+  };
 
   return (
     <>
@@ -117,16 +137,7 @@ export function DownloadView({ id }: { id: string }) {
                 <StyleTrans k="player.menus.downloads.disclaimer" />
               </Menu.Paragraph>
 
-              <Button
-                className="w-full"
-                onClick={() =>
-                  downloadService.download(downloadUrl, {
-                    title: "My movie",
-                    icons: [],
-                  })
-                }
-                theme="purple"
-              >
+              <Button className="w-full" onClick={onDownload} theme="purple">
                 {t("player.menus.downloads.downloadVideo")}
               </Button>
               <Button
