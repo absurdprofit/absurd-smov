@@ -5,7 +5,7 @@ import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
+import { CacheFirst } from "workbox-strategies";
 
 import { PROXY_DESTINATION_QUERY_KEY } from "../common/constants";
 
@@ -25,7 +25,7 @@ registerRoute(
     if (sameOrigin) return isTopLevel(url) && import.meta.env.PROD;
     return request.destination !== "video";
   },
-  new StaleWhileRevalidate({
+  new CacheFirst({
     cacheName: "offline-app-cache",
     plugins: [
       new ExpirationPlugin({
