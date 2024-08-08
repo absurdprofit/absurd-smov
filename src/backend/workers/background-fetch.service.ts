@@ -7,6 +7,8 @@ import { createPartialResponse } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
 import { CacheFirst } from "workbox-strategies";
 
+import { DOWNLOADS_CACHE_NAME } from "@/common/constants";
+
 import { PROXY_DESTINATION_QUERY_KEY } from "../common/constants";
 
 globalThis.skipWaiting();
@@ -59,7 +61,7 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
   const bgFetch = event.registration;
 
   async function until() {
-    const cache = await caches.open("downloads");
+    const cache = await caches.open(DOWNLOADS_CACHE_NAME);
     const records = await bgFetch.matchAll();
 
     const promises = records.map(async (record) => {
@@ -99,9 +101,10 @@ globalThis.addEventListener("backgroundfetchclick", (event) => {
     .matchAll({
       type: "window",
     })
-    .then((matchedClients) => {
-      const client = matchedClients.at(0);
-      if (client) client.navigate(event.registration.id);
-      else clients.openWindow(event.registration.id);
+    .then(async (matchedClients) => {
+      let client = matchedClients.at(0) ?? null;
+      if (client) client = await client.navigate(event.registration.id);
+      else client = await clients.openWindow(event.registration.id);
+      if (!client?.focused) client?.focus();
     });
 });

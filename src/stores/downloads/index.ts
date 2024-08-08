@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 import { DownloadService } from "@/backend/services/download-service";
+import { DOWNLOADS_CACHE_NAME } from "@/common/constants";
 import { PlayerMeta } from "@/stores/player/slices/source";
 
 export interface DownloadMediaItem {
@@ -43,7 +44,10 @@ export interface DownloadStore {
 
 function removeFromCache(download: DownloadMediaItem) {
   const { downloadUrl } = download;
-  queueMicrotask(() => caches.delete(downloadUrl.split("?")[0]));
+  queueMicrotask(async () => {
+    const cache = await caches.open(DOWNLOADS_CACHE_NAME);
+    cache.delete(downloadUrl.split("?")[0]);
+  });
 }
 
 let updateId = 0;
