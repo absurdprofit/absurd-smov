@@ -46,6 +46,13 @@ export function DownloadsPart({
   }, [downloads, progressItems]);
 
   useEffect(() => {
+    // clear downloads badge set in service worker
+    if (document.hasFocus()) navigator.clearAppBadge();
+    else {
+      document.addEventListener("focus", () => navigator.clearAppBadge(), {
+        once: true,
+      });
+    }
     onItemsChange(items.length > 0);
   }, [items, onItemsChange]);
 

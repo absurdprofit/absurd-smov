@@ -6,6 +6,7 @@ import { PROXY_DESTINATION_QUERY_KEY } from "../common/constants";
 export interface DownloadOptions {
   title: string;
   icons: BackgroundFetchIcon[];
+  id?: string;
 }
 
 export class DownloadService extends EventTarget {
@@ -43,23 +44,25 @@ export class DownloadService extends EventTarget {
       }
     } else if (resource instanceof URL) resource = resource.toString();
 
-    this.#worker?.backgroundFetch.fetch("downloads", [resource], {
+    const { id = crypto.randomUUID() } = options;
+    return this.#worker?.backgroundFetch.fetch(id, [resource], {
       ...options,
-      // downloadTotal: await this.#getDownloadSize(url),
+      downloadTotal: await this.#getDownloadSize(resource),
     });
   }
 
-  async #getDownloadSize(url: string) {
-    // use GET since HEAD is sometimes not supported
-    const controller = new AbortController();
-    const response = await fetch(url, {
-      mode: "no-cors",
+  async #getDownloadSize(request: RequestInfo) {
+    const response = await fetch(request, {
       method: "GET",
-      signal: controller.signal,
+      cache: "no-store",
+      headers: {
+        Range: "bytes=-1", // get last byte
+      },
     });
-    const contentLength = response.headers.get("Content-Length") ?? "0";
-    controller.abort();
-    return parseInt(contentLength, 10);
+    const contentRange = response.headers.get("Content-Range");
+    const contentLength = contentRange?.split("/").at(1);
+    if (contentLength) return parseInt(contentLength, 10);
+    return undefined;
   }
 
   #cloneRequestWithNewURL(url: string, request: Request) {

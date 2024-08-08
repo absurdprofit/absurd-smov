@@ -65,6 +65,7 @@ export function DownloadView({ id }: { id: string }) {
     downloadStore.addDownload({
       ...metadata,
       downloadUrl,
+      playerUrl: window.location.pathname,
     });
   };
 

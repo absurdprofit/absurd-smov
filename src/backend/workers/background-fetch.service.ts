@@ -59,7 +59,7 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
   const bgFetch = event.registration;
 
   async function until() {
-    const cache = await caches.open(bgFetch.id);
+    const cache = await caches.open("downloads");
     const records = await bgFetch.matchAll();
 
     const promises = records.map(async (record) => {
@@ -77,6 +77,14 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
     await Promise.all(promises);
 
     new BroadcastChannel(bgFetch.id).postMessage({ stored: true });
+
+    // check if any window is focused, if not set app badge
+    clients.matchAll({ type: "window" }).then((clients) => {
+      const hidden = clients.some(
+        (client) => client.visibilityState === "hidden",
+      );
+      if (hidden) navigator.setAppBadge();
+    });
   }
 
   event.waitUntil(until());
@@ -86,6 +94,14 @@ globalThis.addEventListener("backgroundfetchfail", (event) => {
   console.log("Background fetch failed", event);
 });
 
-globalThis.addEventListener("backgroundfetchclick", () => {
-  clients.openWindow("/");
+globalThis.addEventListener("backgroundfetchclick", (event) => {
+  clients
+    .matchAll({
+      type: "window",
+    })
+    .then((matchedClients) => {
+      const client = matchedClients.at(0);
+      if (client) client.navigate(event.registration.id);
+      else clients.openWindow(event.registration.id);
+    });
 });

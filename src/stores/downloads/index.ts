@@ -13,6 +13,7 @@ export interface DownloadMediaItem {
   type: "show" | "movie";
   updatedAt: number;
   downloadUrl: string;
+  playerUrl: string;
 }
 
 export interface DownloadUpdateItem {
@@ -25,15 +26,24 @@ export interface DownloadUpdateItem {
   action: "delete" | "add";
 }
 
+export interface DownloadMeta extends PlayerMeta {
+  downloadUrl: string;
+  playerUrl: string;
+}
 export interface DownloadStore {
   downloads: Record<string, DownloadMediaItem>;
   updateQueue: DownloadUpdateItem[];
-  addDownload(meta: PlayerMeta & { downloadUrl: string }): void;
+  addDownload(meta: DownloadMeta): void;
   removeDownload(id: string): void;
   replaceDownloads(items: Record<string, DownloadMediaItem>): void;
   clear(): void;
   clearUpdateQueue(): void;
   removeUpdateItem(id: string): void;
+}
+
+function removeFromCache(download: DownloadMediaItem) {
+  const { downloadUrl } = download;
+  queueMicrotask(() => caches.delete(downloadUrl.split("?")[0]));
 }
 
 let updateId = 0;
@@ -52,6 +62,7 @@ export const useDownloadStore = create(
             tmdbId: id,
           });
 
+          removeFromCache(s.downloads[id]);
           delete s.downloads[id];
         });
       },
@@ -74,6 +85,7 @@ export const useDownloadStore = create(
             year: meta.releaseYear,
             poster: meta.poster,
             downloadUrl: meta.downloadUrl,
+            playerUrl: meta.playerUrl,
             updatedAt: Date.now(),
           };
 
@@ -91,16 +103,19 @@ export const useDownloadStore = create(
           DownloadService.instance.download(meta.downloadUrl, {
             title,
             icons: [icon],
+            id: meta.playerUrl,
           });
         });
       },
       replaceDownloads(items: Record<string, DownloadMediaItem>) {
         set((s) => {
+          Object.values(s.downloads).forEach(removeFromCache);
           s.downloads = items;
         });
       },
       clear() {
         set((s) => {
+          Object.values(s.downloads).forEach(removeFromCache);
           s.downloads = {};
         });
       },
