@@ -40,8 +40,9 @@ registerRoute(
 
 async function cacheOrFetch(event: FetchEvent) {
   // Offline first:
-  const url = event.request.url.split("?")[0]; // remove the query part
-  const cachedResponse = await caches.match(url);
+  const cachedResponse = await caches.match(event.request, {
+    ignoreSearch: true,
+  });
 
   if (!cachedResponse) return fetch(event.request);
 
@@ -71,7 +72,7 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
         // decode and remove the query part;
         request = decodeURIComponent(
           proxiedURL.searchParams.get(PROXY_DESTINATION_QUERY_KEY)!,
-        ).split("?")[0];
+        );
       else request = record.request;
       await cache.put(request, await record.responseReady);
     });

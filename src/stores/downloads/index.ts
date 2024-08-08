@@ -46,7 +46,7 @@ function removeFromCache(download: DownloadMediaItem) {
   const { downloadUrl } = download;
   queueMicrotask(async () => {
     const cache = await caches.open(DOWNLOADS_CACHE_NAME);
-    cache.delete(downloadUrl.split("?")[0]);
+    cache.delete(downloadUrl, { ignoreSearch: true });
   });
 }
 
