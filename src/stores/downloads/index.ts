@@ -7,6 +7,11 @@ import { DownloadService } from "@/backend/services/download-service";
 import { DOWNLOADS_CACHE_NAME } from "@/common/constants";
 import { PlayerMeta } from "@/stores/player/slices/source";
 
+export interface DownloadProgressItem {
+  downloaded: number;
+  downloadTotal: number;
+}
+
 export interface DownloadMediaItem {
   title: string;
   year?: number;
@@ -15,6 +20,7 @@ export interface DownloadMediaItem {
   updatedAt: number;
   downloadUrl: string;
   playerUrl: string;
+  progress: DownloadProgressItem;
 }
 
 export interface DownloadUpdateItem {
@@ -22,9 +28,15 @@ export interface DownloadUpdateItem {
   title?: string;
   year?: number;
   id: string;
+  progress?: DownloadProgressItem;
   poster?: string;
   type?: "show" | "movie";
-  action: "delete" | "add";
+  action: "upsert" | "delete" | "add";
+}
+
+export interface UpdateItemOptions {
+  meta: DownloadMeta;
+  progress: DownloadProgressItem;
 }
 
 export interface DownloadMeta extends PlayerMeta {
@@ -33,6 +45,7 @@ export interface DownloadMeta extends PlayerMeta {
 }
 export interface DownloadStore {
   downloads: Record<string, DownloadMediaItem>;
+  updateItem(ops: UpdateItemOptions): void;
   updateQueue: DownloadUpdateItem[];
   addDownload(meta: DownloadMeta): void;
   removeDownload(id: string): void;
@@ -79,6 +92,10 @@ export const useDownloadStore = create(
             tmdbId: meta.tmdbId,
             type: meta.type,
             title: meta.title,
+            progress: {
+              downloaded: 0,
+              downloadTotal: 0,
+            },
             year: meta.releaseYear,
             poster: meta.poster,
           });
@@ -90,6 +107,10 @@ export const useDownloadStore = create(
             poster: meta.poster,
             downloadUrl: meta.downloadUrl,
             playerUrl: meta.playerUrl,
+            progress: {
+              downloaded: 0,
+              downloadTotal: 0,
+            },
             updatedAt: Date.now(),
           };
 
@@ -104,17 +125,63 @@ export const useDownloadStore = create(
           const icon = {
             src: meta.poster ?? "/android-chrome-512x512.png",
           };
-          DownloadService.instance.download(meta.downloadUrl, {
-            title,
-            icons: [icon],
-            id: meta.playerUrl,
-          });
+          DownloadService.instance
+            .download(meta.downloadUrl, {
+              title,
+              icons: [icon],
+              id: meta.playerUrl,
+            })
+            .then((registration) => {
+              registration?.addEventListener("progress", () => {
+                const { downloadTotal, downloaded } = registration;
+                const progress = { downloadTotal, downloaded };
+                this.updateItem({ meta, progress });
+              });
+            });
         });
       },
       replaceDownloads(items: Record<string, DownloadMediaItem>) {
         set((s) => {
           Object.values(s.downloads).forEach(removeFromCache);
           s.downloads = items;
+        });
+      },
+      updateItem({ meta, progress }) {
+        set((s) => {
+          // add to updateQueue
+          updateId += 1;
+          s.updateQueue.push({
+            tmdbId: meta.tmdbId,
+            title: meta.title,
+            year: meta.releaseYear,
+            poster: meta.poster,
+            type: meta.type,
+            progress: { ...progress },
+            id: updateId.toString(),
+            action: "upsert",
+          });
+
+          // add to progress store
+          if (!s.downloads[meta.tmdbId])
+            s.downloads[meta.tmdbId] = {
+              type: meta.type,
+              updatedAt: 0,
+              title: meta.title,
+              year: meta.releaseYear,
+              poster: meta.poster,
+              downloadUrl: meta.downloadUrl,
+              playerUrl: meta.playerUrl,
+              progress,
+            };
+          const download = s.downloads[meta.tmdbId];
+          download.updatedAt = Date.now();
+
+          if (!download.progress)
+            download.progress = {
+              downloaded: 0,
+              downloadTotal: 0,
+            };
+          download.progress = { ...progress };
         });
       },
       clear() {

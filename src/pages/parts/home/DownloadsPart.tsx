@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 import { EditButton } from "@/components/buttons/EditButton";
 import { Icons } from "@/components/Icon";
 import { SectionHeading } from "@/components/layout/SectionHeading";
+import { DownloadMediaCard } from "@/components/media/DownloadMediaCard";
 import { MediaGrid } from "@/components/media/MediaGrid";
-import { WatchedMediaCard } from "@/components/media/WatchedMediaCard";
-import { useDownloadStore } from "@/stores/downloads";
-import { useProgressStore } from "@/stores/progress";
+import { DownloadProgressItem, useDownloadStore } from "@/stores/downloads";
 import { MediaItem } from "@/utils/mediaTypes";
 
 export function DownloadsPart({
@@ -17,33 +16,21 @@ export function DownloadsPart({
   onItemsChange: (hasItems: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const progressItems = useProgressStore((s) => s.items);
   const downloads = useDownloadStore((s) => s.downloads);
   const removeDownload = useDownloadStore((s) => s.removeDownload);
   const [editing, setEditing] = useState(false);
   const [gridRef] = useAutoAnimate<HTMLDivElement>();
 
   const items = useMemo(() => {
-    let output: MediaItem[] = [];
+    const output: (MediaItem & { progress: DownloadProgressItem })[] = [];
     Object.entries(downloads).forEach((entry) => {
       output.push({
         id: entry[0],
         ...entry[1],
       });
     });
-    output = output.sort((a, b) => {
-      const downloadA = downloads[a.id];
-      const downloadB = downloads[b.id];
-      const progressA = progressItems[a.id];
-      const progressB = progressItems[b.id];
-
-      const dateA = Math.max(downloadA.updatedAt, progressA?.updatedAt ?? 0);
-      const dateB = Math.max(downloadB.updatedAt, progressB?.updatedAt ?? 0);
-
-      return dateB - dateA;
-    });
     return output;
-  }, [downloads, progressItems]);
+  }, [downloads]);
 
   useEffect(() => {
     // clear downloads badge set in service worker
@@ -68,7 +55,7 @@ export function DownloadsPart({
       </SectionHeading>
       <MediaGrid ref={gridRef}>
         {items.map((v) => (
-          <WatchedMediaCard
+          <DownloadMediaCard
             key={v.id}
             media={v}
             closable={editing}

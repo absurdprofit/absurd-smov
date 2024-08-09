@@ -11,7 +11,7 @@ import {
 
 import { convertLegacyUrl, isLegacyUrl } from "@/backend/metadata/getmeta";
 import { generateQuickSearchMediaUrl } from "@/backend/metadata/tmdb";
-import { useOnlineListener } from "@/hooks/usePing";
+import { useOnline } from "@/hooks/useOnline";
 import { AboutPage } from "@/pages/About";
 import { AdminPage } from "@/pages/admin/AdminPage";
 import VideoTesterView from "@/pages/developer/VideoTesterView";
@@ -89,7 +89,7 @@ function QueryView() {
 
 function App() {
   useHistoryListener();
-  useOnlineListener();
+  useOnline();
   const maintenance = false; // Shows maintance page
   const [showDowntime, setShowDowntime] = useState(maintenance);
 

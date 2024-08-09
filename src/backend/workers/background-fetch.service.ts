@@ -3,7 +3,7 @@
 /// <reference types="./background-fetch.d.ts" />
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
-import { createPartialResponse } from "workbox-range-requests";
+import { RangeRequestsPlugin } from "workbox-range-requests";
 import { registerRoute } from "workbox-routing";
 import { CacheFirst } from "workbox-strategies";
 
@@ -23,6 +23,17 @@ function isTopLevel(url: URL) {
 }
 
 registerRoute(
+  ({ request }) => request.destination === "video",
+  new CacheFirst({
+    cacheName: DOWNLOADS_CACHE_NAME,
+    matchOptions: {
+      ignoreSearch: true,
+    },
+    plugins: [new RangeRequestsPlugin()],
+  }),
+);
+
+registerRoute(
   ({ request, url, sameOrigin }) => {
     if (sameOrigin) return isTopLevel(url) && import.meta.env.PROD;
     return request.destination !== "video";
@@ -37,26 +48,6 @@ registerRoute(
     ],
   }),
 );
-
-async function cacheOrFetch(event: FetchEvent) {
-  // Offline first:
-  const cachedResponse = await caches.match(event.request, {
-    ignoreSearch: true,
-  });
-
-  if (!cachedResponse) return fetch(event.request);
-
-  if (event.request.headers.has("Range")) {
-    return createPartialResponse(event.request, cachedResponse);
-  }
-  return cachedResponse;
-}
-
-globalThis.addEventListener("fetch", (event) => {
-  if (event.request.destination !== "video") return;
-
-  event.respondWith(cacheOrFetch(event));
-});
 
 globalThis.addEventListener("backgroundfetchsuccess", (event) => {
   const bgFetch = event.registration;
@@ -95,6 +86,10 @@ globalThis.addEventListener("backgroundfetchsuccess", (event) => {
 
 globalThis.addEventListener("backgroundfetchfail", (event) => {
   console.log("Background fetch failed", event);
+});
+
+globalThis.addEventListener("backgroundfetchabort", (event) => {
+  console.log("Background fetch aborted", event);
 });
 
 globalThis.addEventListener("backgroundfetchclick", (event) => {
