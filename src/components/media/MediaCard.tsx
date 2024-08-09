@@ -109,7 +109,7 @@ function MediaCardContent({
               <p
                 className={[
                   "text-center text-xs font-bold text-mediaCard-badgeText transition-colors",
-                  closable ? "" : "group-hover:text-white",
+                  closable || !linkable ? "" : "group-hover:text-white",
                 ].join(" ")}
               >
                 {t("media.episodeDisplay", {

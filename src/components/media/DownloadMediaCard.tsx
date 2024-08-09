@@ -36,15 +36,19 @@ export function DownloadMediaCard(props: DownloadMediaCardProps) {
   }, [progressItems, props.media]);
   const online = useOnline();
 
-  const percentage =
-    props.media.progress.downloaded / props.media.progress.downloadTotal;
+  const percentage = useMemo(() => {
+    return (
+      (props.media.progress.downloaded / props.media.progress.downloadTotal) *
+      100
+    );
+  }, [props.media.progress.downloaded, props.media.progress.downloadTotal]);
 
   return (
     <MediaCard
       media={props.media}
       series={formatSeries(series)}
       linkable={percentage === 100 || online}
-      percentage={percentage}
+      percentage={percentage === 100 ? undefined : percentage}
       onClose={props.onClose}
       closable={props.closable}
     />

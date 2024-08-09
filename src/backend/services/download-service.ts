@@ -12,13 +12,16 @@ export interface DownloadOptions {
 export class DownloadService extends EventTarget {
   static #instance?: DownloadService;
 
-  #worker?: ServiceWorkerRegistration;
+  #worker: Promise<ServiceWorkerRegistration | undefined>;
+
+  // keep strong references to background fetch registration
+  // to prevent event listeners in short lived scopes from being collected
+  #registrations: Map<string, BackgroundFetchRegistration | undefined> =
+    new Map();
 
   private constructor() {
     super();
-    navigator.serviceWorker.getRegistration().then((worker) => {
-      this.#worker = worker;
-    });
+    this.#worker = navigator.serviceWorker.getRegistration();
   }
 
   static get instance() {
@@ -45,10 +48,18 @@ export class DownloadService extends EventTarget {
     } else if (resource instanceof URL) resource = resource.toString();
 
     const { id = crypto.randomUUID() } = options;
-    return this.#worker?.backgroundFetch.fetch(id, [resource], {
+    const worker = await this.#worker;
+    const registration = await worker?.backgroundFetch.fetch(id, [resource], {
       ...options,
       downloadTotal: await this.#getDownloadSize(resource),
     });
+    this.#registrations.set(id, registration);
+    return registration;
+  }
+
+  public async getRegistration(id: string) {
+    const worker = await this.#worker;
+    return this.#registrations.get(id) ?? worker?.backgroundFetch.get(id);
   }
 
   async #getDownloadSize(request: RequestInfo) {
