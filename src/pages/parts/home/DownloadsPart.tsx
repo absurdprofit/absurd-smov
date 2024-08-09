@@ -7,8 +7,7 @@ import { Icons } from "@/components/Icon";
 import { SectionHeading } from "@/components/layout/SectionHeading";
 import { DownloadMediaCard } from "@/components/media/DownloadMediaCard";
 import { MediaGrid } from "@/components/media/MediaGrid";
-import { DownloadProgressItem, useDownloadStore } from "@/stores/downloads";
-import { MediaItem } from "@/utils/mediaTypes";
+import { DownloadMediaItem, useDownloadStore } from "@/stores/downloads";
 
 export function DownloadsPart({
   onItemsChange,
@@ -22,7 +21,7 @@ export function DownloadsPart({
   const [gridRef] = useAutoAnimate<HTMLDivElement>();
 
   const items = useMemo(() => {
-    const output: (MediaItem & { progress: DownloadProgressItem })[] = [];
+    const output: (DownloadMediaItem & { id: string })[] = [];
     Object.entries(downloads).forEach((entry) => {
       output.push({
         id: entry[0],

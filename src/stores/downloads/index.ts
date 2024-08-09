@@ -19,13 +19,13 @@ export interface DownloadMediaItem {
   type: "show" | "movie";
   updatedAt: number;
   downloadUrl: string;
+  tmdbId: string;
   playerUrl: string;
   progress: DownloadProgressItem;
   registration?: BackgroundFetchRegistration;
 }
 
 export interface DownloadUpdateItem {
-  tmdbId: string;
   title?: string;
   year?: number;
   id: string;
@@ -63,7 +63,8 @@ function updateProgress(id: string, registration: BackgroundFetchRegistration) {
     const progress = { downloadTotal, downloaded };
 
     immerSet?.((s) => {
-      s.downloads[id].progress = progress;
+      const download = s.downloads[id];
+      if (download) download.progress = progress;
     });
   });
 }
@@ -91,7 +92,6 @@ export const useDownloadStore = create(
             s.updateQueue.push({
               id: updateId.toString(),
               action: "delete",
-              tmdbId: id,
             });
 
             cleanupRegistrationAndCache(s.downloads[id]);
@@ -104,7 +104,6 @@ export const useDownloadStore = create(
             s.updateQueue.push({
               id: updateId.toString(),
               action: "add",
-              tmdbId: meta.tmdbId,
               type: meta.type,
               title: meta.title,
               progress: {
@@ -115,10 +114,11 @@ export const useDownloadStore = create(
               poster: meta.poster,
             });
 
-            s.downloads[meta.tmdbId] = {
+            s.downloads[meta.downloadUrl] = {
               type: meta.type,
               title: meta.title,
               year: meta.releaseYear,
+              tmdbId: meta.tmdbId,
               poster: meta.poster,
               downloadUrl: meta.downloadUrl,
               playerUrl: meta.playerUrl,
@@ -148,13 +148,10 @@ export const useDownloadStore = create(
               })
               .then((registration) => {
                 set((state) => {
-                  state.downloads[meta.tmdbId].registration = registration;
+                  state.downloads[meta.downloadUrl].registration = registration;
                 });
-                registration?.addEventListener("progress", () => {
-                  const { downloadTotal, downloaded } = registration;
-                  const progress = { downloadTotal, downloaded };
-                  this.updateItem({ meta, progress });
-                });
+                if (registration)
+                  updateProgress(meta.downloadUrl, registration);
               });
           });
         },
@@ -169,7 +166,6 @@ export const useDownloadStore = create(
             // add to updateQueue
             updateId += 1;
             s.updateQueue.push({
-              tmdbId: meta.tmdbId,
               title: meta.title,
               year: meta.releaseYear,
               poster: meta.poster,
@@ -180,18 +176,19 @@ export const useDownloadStore = create(
             });
 
             // add to progress store
-            if (!s.downloads[meta.tmdbId])
-              s.downloads[meta.tmdbId] = {
+            if (!s.downloads[meta.downloadUrl])
+              s.downloads[meta.downloadUrl] = {
                 type: meta.type,
                 updatedAt: 0,
                 title: meta.title,
+                tmdbId: meta.tmdbId,
                 year: meta.releaseYear,
                 poster: meta.poster,
                 downloadUrl: meta.downloadUrl,
                 playerUrl: meta.playerUrl,
                 progress,
               };
-            const download = s.downloads[meta.tmdbId];
+            const download = s.downloads[meta.downloadUrl];
             download.updatedAt = Date.now();
 
             if (!download.progress)

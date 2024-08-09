@@ -137,6 +137,7 @@ function MediaCardContent({
                   <div
                     className="absolute inset-y-0 left-0 rounded-full bg-mediaCard-barFillColor"
                     style={{
+                      transition: "width 3s ease-in-out",
                       width: percentageString,
                     }}
                   />

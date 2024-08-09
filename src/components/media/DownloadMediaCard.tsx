@@ -22,7 +22,7 @@ function formatSeries(series?: ShowProgressResult | null) {
 }
 
 export interface DownloadMediaCardProps {
-  media: MediaItem & { progress: DownloadProgressItem };
+  media: MediaItem & { progress: DownloadProgressItem; tmdbId: string };
   closable?: boolean;
   onClose?: () => void;
 }
@@ -30,7 +30,7 @@ export interface DownloadMediaCardProps {
 export function DownloadMediaCard(props: DownloadMediaCardProps) {
   const progressItems = useProgressStore((s) => s.items);
   const series = useMemo(() => {
-    const data = progressItems[props.media.id];
+    const data = progressItems[props.media.tmdbId];
     if (data) return shouldShowProgress(data);
     return null;
   }, [progressItems, props.media]);
